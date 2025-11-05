@@ -1,0 +1,17 @@
+<html>
+<body>
+    <nav>
+        <a href="">home</a>
+        <a href="{% url 'Conferencelist' %}">conférences</a>
+        <a>Contact
+        </a>
+    </nav>
+    <div>
+        {% block content %}{% endblock%}
+    </div>
+    <footer>
+        <p>2025/2026</p>
+        <p>workshop Django</p>
+    </footer>
+</body>
+</html>

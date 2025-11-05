@@ -1,0 +1,6 @@
+<p>voulez vous supprimer la conferences{{object.name}}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">oui</button>
+    <a href="{% url 'Conferencelist' %}">non</a>
+</form>
