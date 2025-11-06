@@ -1,29 +1,77 @@
-{% extends "base.html "%}
+{% extends "base.html" %}
+{% block title %}Liste des Conférences{% endblock %}
 
 {% block content %}
-<h2>la liste des conferences</h2>
-<a href="{% url 'Conference_add'  %}">Ajouter des conferences</a><br>
-<table border ="1">
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">Liste des Conférences</h2>
     
-    <tr>
-        <td>title</td>
-        <td>location</td>
-        <td>action</td>
-    </tr>
-{% for c in liste %}
-    <tr>
-        <td>{{c.name}}</td>
-        <td>{{c.location}}</td>
-        <td>
-            <a href="{% url 'Conference_detail' c.pk %}">détails</a><br></td>
-        <td>
-            <a href="{% url 'Conference_edit' c.pk %}">modifier</a>
-        </td>
-        <td>
-            <a href="{% url 'Conference_delete' c.pk %}">supprimer</a>
-        </td>
-        
-    </tr>
-{% endfor %}
-</table>
-{% endblock%}
+    {% if user.is_authenticated and user.role == "committee" %}
+      <a href="{% url 'Conference_add' %}" class="btn btn-success">
+        Ajouter
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>
+          {% if message.tags == 'success' %}Succès !{% endif %}
+          {% if message.tags == 'error' %}Erreur !{% endif %}
+        </strong>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>Titre</th>
+          <th>Lieu</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in liste %}
+          <tr>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.location }}</td>
+            <td class="text-center">
+              <a href="{% url 'Conference_detail' c.pk %}" class="btn btn-sm btn-info text-white">
+                Détails
+              </a>
+              
+                <a href="{% url 'Conference_edit' c.pk %}" class="btn btn-sm btn-warning">
+                  Modifier
+                </a>
+                <a href="{% url 'Conference_delete' c.pk %}" 
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Supprimer « {{ c.name|escapejs }} » ?');">
+                  Supprimer
+                </a>
+
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">
+              Aucune conférence disponible.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bouton Retour -->
+  <a href="" class="btn btn-outline-secondary mt-3">
+    Retour à l'accueil
+  </a>
+</div>
+{% endblock %}

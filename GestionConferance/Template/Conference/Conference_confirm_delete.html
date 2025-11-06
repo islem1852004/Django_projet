@@ -1,6 +1,29 @@
-<p>voulez vous supprimer la conferences{{object.name}}?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">oui</button>
-    <a href="{% url 'Conferencelist' %}">non</a>
-</form>
+{% extends "base.html" %}
+{% block title %}Supprimer {{ object.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card border-danger">
+    <div class="card-header bg-danger text-white">
+      <h4>Confirmer la suppression</h4>
+    </div>
+    <div class="card-body">
+      <p class="lead">
+        Voulez-vous vraiment supprimer la conférence <strong>"{{ object.name }}"</strong> ?
+      </p>
+      <p class="text-muted">Cette action est irréversible.</p>
+      
+      <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+          Oui, supprimer
+        </button>
+      </form>
+      
+      <a href="{% url 'Conferencelist' %}" class="btn btn-secondary">
+        Non, annuler
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
