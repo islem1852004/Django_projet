@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Détails de la Soumission {{ submission.submission_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">Détails de la Soumission</h2>
+    <a href="{% url 'SubmissionList' %}" class="btn btn-outline-secondary">
+      Retour à mes soumissions
+    </a>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>
+          {% if message.tags == 'success' %}Succès !{% endif %}
+          {% if message.tags == 'error' %}Erreur !{% endif %}
+        </strong>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Card principale -->
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">
+        <code class="text-monospace">{{ submission.submission_id }}</code>
+        <span class="badge 
+          {% if submission.status == 'submitted' %}bg-light text-dark{% endif %}
+          {% if submission.status == 'under_review' %}bg-warning text-dark{% endif %}
+          {% if submission.status == 'accepted' %}bg-success{% endif %}
+          {% if submission.status == 'rejected' %}bg-danger{% endif %}
+          ">
+          {{ submission.get_status_display }}
+        </span>
+      </h5>
+    </div>
+    <div class="card-body">
+      <!-- Infos principales -->
+      <div class="row g-4">
+        <div class="col-md-8">
+          <h4 class="text-dark fw-bold">{{ submission.title }}</h4>
+          <p class="text-muted small">
+            Soumise le <strong>{{ submission.submission_date|date:"d F Y" }}</strong>
+            à <strong>{{ submission.submission_date|time:"H:i" }}</strong>
+            par <strong>{{ submission.user.get_full_name|default:submission.user.username }}</strong>
+          </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          {% if submission.paid %}
+            <span class="badge bg-success fs-6">Frais payés</span>
+          {% else %}
+            <span class="badge bg-warning text-dark fs-6">Frais non payés</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- Conférence -->
+      <div class="mb-4">
+        <h6 class="text-primary fw-semibold">Conférence associée</h6>
+        <div class="border-start border-primary border-4 ps-3">
+          <p class="mb-1"><strong>{{ submission.conference.name }}</strong></p>
+          <p class="text-muted mb-1">
+            {{ submission.conference.location }} 
+            <span class="mx-2">•</span>
+            Du {{ submission.conference.start_date|date:"d/m/Y" }} au {{ submission.conference.end_date|date:"d/m/Y" }}
+          </p>
+          <p class="small text-muted">
+            Thème : <em>{{ submission.conference.get_theme_display }}</em>
+          </p>
+        </div>
+      </div>
+
+      <!-- Résumé -->
+      <div class="mb-4">
+        <h6 class="text-primary fw-semibold">Résumé</h6>
+        <div class="bg-light p-3 rounded">
+          <p class="mb-0 text-justify">{{ submission.abstract|linebreaks }}</p>
+        </div>
+      </div>
+
+      <!-- Mots-clés -->
+      <div class="mb-4">
+        <h6 class="text-primary fw-semibold">Mots-clés</h6>
+        <div>
+          {% for keyword in submission.keywords|split:"," %}
+            {% if keyword.strip %}
+              <span class="badge bg-secondary me-1 mb-1">{{ keyword.strip }}</span>
+            {% endif %}
+          {% empty %}
+            <em class="text-muted">Aucun mot-clé</em>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Fichier PDF -->
+      <div class="mb-4">
+        <h6 class="text-primary fw-semibold">Article soumis</h6>
+        {% if submission.paper %}
+          <a href="{{ submission.paper.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+            Télécharger le PDF
+          </a>
+          <small class="text-muted d-block mt-1">
+            Fichier : <code>{{ submission.paper.name|cut:"papers/" }}</code>
+          </small>
+        {% else %}
+          <em class="text-muted">Aucun fichier joint</em>
+        {% endif %}
+      </div>
+
+      <!-- Métadonnées -->
+      <div class="row text-muted small mt-5 pt-3 border-top">
+        <div class="col-md-6">
+          <strong>Créée le :</strong> {{ submission.created_at|date:"d/m/Y à H:i" }}
+        </div>
+        <div class="col-md-6">
+          <strong>Mise à jour le :</strong> {{ submission.updated_at|date:"d/m/Y à H:i" }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions en bas -->
+    <div class="card-footer bg-light d-flex justify-content-between">
+      <div>
+        {% if submission.status == "submitted" or submission.status == "rejected" %}
+          <a href="{% url 'SubmissionUpdate' submission.submission_id %}" class="btn btn-warning btn-sm">
+            Modifier
+          </a>
+        {% endif %}
+        <a href="{% url 'SubmissionDelete' submission.submission_id %}" 
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Supprimer définitivement cette soumission ?');">
+          Supprimer
+        </a>
+      </div>
+      <a href="{% url 'SubmissionList' %}" class="btn btn-outline-secondary btn-sm">
+        Mes soumissions
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

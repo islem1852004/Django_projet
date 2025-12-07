@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if form.instance.pk %}Modifier la Soumission{% else %}Nouvelle Soumission{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">
+      {% if form.instance.pk %}
+        Modifier la Soumission <code>{{ form.instance.submission_id }}</code>
+      {% else %}
+        Nouvelle Soumission
+      {% endif %}
+    </h2>
+    <a href="{% url 'SubmissionList' %}" class="btn btn-outline-secondary">
+      Retour à mes soumissions
+    </a>
+  </div>
+
+  <!-- Messages d'erreur ou succès -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>
+          {% if message.tags == 'success' %}Succès !{% endif %}
+          {% if message.tags == 'error' %}Erreur !{% endif %}
+        </strong>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Formulaire -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- Conférence (uniquement à la création) -->
+        {% if not form.instance.pk %}
+          <div class="mb-3">
+            <label for="{{ form.conference.id_for_label }}" class="form-label fw-semibold text-primary">
+              Conférence <span class="text-danger">*</span>
+            </label>
+            {{ form.conference }}
+            {% if form.conference.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.conference.errors %}
+                  {{ error }}<br>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">
+              Seules les conférences à venir sont disponibles.
+            </div>
+          </div>
+        {% else %}
+          <!-- Affichage en lecture seule si modification -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-primary">Conférence associée</label>
+            <p class="form-control-plaintext fw-bold">
+              {{ form.instance.conference.name }}
+              <span class="text-muted small d-block">
+                Du {{ form.instance.conference.start_date|date:"d/m/Y" }}
+                au {{ form.instance.conference.end_date|date:"d/m/Y" }}
+              </span>
+            </p>
+          </div>
+        {% endif %}
+
+        <!-- Titre -->
+        <div class="mb-3">
+          <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold text-primary">
+            Titre de l'article <span class="text-danger">*</span>
+          </label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.title.errors %}{{ error }}<br>{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Résumé -->
+        <div class="mb-3">
+          <label for="{{ form.abstract.id_for_label }}" class="form-label fw-semibold text-primary">
+            Résumé <span class="text-danger">*</span>
+          </label>
+          {{ form.abstract }}
+          {% if form.abstract.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.abstract.errors %}{{ error }}<br>{% endfor %}
+            </div>
+          {% endif %}
+          <div class="form-text">Décrivez brièvement votre travail.</div>
+        </div>
+
+        <!-- Mots-clés -->
+        <div class="mb-3">
+          <label for="{{ form.keywords.id_for_label }}" class="form-label fw-semibold text-primary">
+            Mots-clés <span class="text-danger">*</span>
+          </label>
+          {{ form.keywords }}
+          {% if form.keywords.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.keywords.errors %}{{ error }}<br>{% endfor %}
+            </div>
+          {% else %}
+            <div class="form-text">
+              Séparez les mots-clés par des virgules (max 10).
+              <br>Exemple : <code>IA, apprentissage profond, vision par ordinateur</code>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Fichier PDF -->
+        <div class="mb-4">
+          <label for="{{ form.paper.id_for_label }}" class="form-label fw-semibold text-primary">
+            Article (PDF) {% if not form.instance.pk %}<span class="text-danger">*</span>{% endif %}
+          </label>
+          {{ form.paper }}
+          {% if form.paper.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.paper.errors %}{{ error }}<br>{% endfor %}
+            </div>
+          {% endif %}
+
+          {% if form.instance.paper %}
+            <div class="mt-2 p-2 bg-light rounded small">
+              <strong>Fichier actuel :</strong>
+              <a href="{{ form.instance.paper.url }}" target="_blank" class="text-decoration-none">
+                {{ form.instance.paper.name|cut:"papers/" }}
+              </a>
+            </div>
+          {% endif %}
+
+          <div class="form-text">
+            Format accepté : <strong>.pdf</strong> uniquement.
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success px-4">
+            {% if form.instance.pk %}Mettre à jour{% else %}Soumettre{% endif %}
+          </button>
+          <a href="{% url 'SubmissionList' %}" class="btn btn-outline-danger">
+            Annuler
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Info importante -->
+  <div class="mt-4 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+    <small class="text-muted">
+      <strong>Note :</strong> Vous ne pouvez soumettre que <strong>3 articles par jour</strong>.
+      Une fois acceptée ou en révision, la soumission ne pourra plus être modifiée.
+    </small>
+  </div>
+</div>
+{% endblock %}

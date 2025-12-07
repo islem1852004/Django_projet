@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Mes Soumissions{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary">Mes Soumissions</h2>
+    
+    {% if user.is_authenticated %}
+      <a href="{% url 'SubmissionCreate' %}" class="btn btn-success">
+        Nouvelle Soumission
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>
+          {% if message.tags == 'success' %}Succès !{% endif %}
+          {% if message.tags == 'error' %}Erreur !{% endif %}
+        </strong>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Tableau -->
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+      <thead class="table-primary">
+        <tr>
+          <th>ID</th>
+          <th>Titre</th>
+          <th>Conférence</th>
+          <th>Date</th>
+          <th>Statut</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in liste %}
+          <tr>
+            <td><code class="text-monospace">{{ s.submission_id }}</code></td>
+            <td><strong>{{ s.title|truncatewords:8 }}</strong></td>
+            <td>{{ s.conference.name }}</td>
+            <td>{{ s.submission_date|date:"d/m/Y" }}</td>
+            <td>
+              {% if s.status == "submitted" %}
+                <span class="badge bg-secondary">Soumis</span>
+              {% elif s.status == "under_review" %}
+                <span class="badge bg-warning text-dark">En révision</span>
+              {% elif s.status == "accepted" %}
+                <span class="badge bg-success">Accepté</span>
+              {% elif s.status == "rejected" %}
+                <span class="badge bg-danger">Rejeté</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <a href="{% url 'SubmissionDetails' s.submission_id %}" class="btn btn-sm btn-info text-white">
+                Détails
+              </a>
+              
+              {% if s.status == "submitted" or s.status == "rejected" %}
+                <a href="{% url 'SubmissionUpdate' s.submission_id %}" class="btn btn-sm btn-warning">
+                  Modifier
+                </a>
+              {% else %}
+                <button class="btn btn-sm btn-warning" disabled title="Modification non autorisée">
+                  Modifier
+                </button>
+              {% endif %}
+
+              <a href="{% url 'SubmissionDelete' s.submission_id %}" 
+                 class="btn btn-sm btn-danger"
+                 onclick="return confirm('Supprimer la soumission « {{ s.title|truncatechars:30|escapejs }} » ?');">
+                Supprimer
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              Aucune soumission effectuée.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bouton Retour -->
+  <a href="{% url 'Conferencelist' %}" class="btn btn-outline-secondary mt-3">
+    Retour aux Conférences
+  </a>
+</div>
+{% endblock %}
